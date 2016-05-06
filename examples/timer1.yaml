@@ -1,0 +1,10 @@
+
+---
+graph: mygraph
+resources:
+  noop:
+  - name: noop1
+  timer:
+  - name: timer1
+    period: 1m
+edges: []
