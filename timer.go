@@ -17,10 +17,7 @@
 
 package main
 
-import
-
-//"github.com/go-fsnotify/fsnotify" // git master of "gopkg.in/fsnotify.v1"
-(
+import (
 	"encoding/gob"
 	"log"
 )
@@ -29,8 +26,27 @@ func init() {
 	gob.Register(&TimerRes{})
 }
 
+// TODO generate retry types using stringer?
+// possible constant values differ from issue because these are more explicit.
+/*
+	//go:generate stringer -type=Retry
+	// Retry is the retry type for timer events
+	type Retry int
+
+	const (
+		None = iota  // no retry
+		Linear  // n
+		NLogN
+		NSquared
+	)
+)
+*/
+
 type TimerRes struct {
-	BaseRes `yaml:",inline"`
+	BaseRes   `yaml:",inline"`
+	Period    string `yaml:"period"`    // define as duration, e.g. 5s
+	RetryType string `yaml:"retrytype"` // retry algorithm for retries
+	// Event?  i.e., how to define the target of the timer
 }
 
 func NewTimerRes(name string) *TimerRes {
