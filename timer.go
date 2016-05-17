@@ -20,13 +20,14 @@ package main
 import (
 	"encoding/gob"
 	"log"
+	"time"
 )
 
 func init() {
 	gob.Register(&TimerRes{})
 }
 
-// TODO generate retry types using stringer?
+// TODO generate retry and reset types using stringer?
 // possible constant values differ from issue because these are more explicit.
 /*
 	//go:generate stringer -type=Retry
@@ -39,13 +40,24 @@ func init() {
 		NLogN
 		NSquared
 	)
+
+	//go:generate stringer -type=Reset
+	// Retry is the retry type for timer events
+	type Reset int
+
+	const (
+		None = iota  // no retry
+		Event        // when an event is fired?
+	)
 )
 */
 
 type TimerRes struct {
-	BaseRes   `yaml:",inline"`
-	Period    string `yaml:"period"`    // define as duration, e.g. 5s
-	RetryType string `yaml:"retrytype"` // retry algorithm for retries
+	BaseRes `yaml:",inline"`
+	Period  string `yaml:"period"` // define as duration, e.g. 5s
+	period  time.Duration
+	Retry   string `yaml:"retry"` // retry algorithm for retries
+	Reset   string `yaml:"reset"`
 	// Event?  i.e., how to define the target of the timer
 }
 
@@ -67,6 +79,12 @@ func (obj *TimerRes) Init() {
 // validate if the params passed in are valid data
 // FIXME: where should this get called ?
 func (obj *TimerRes) Validate() bool {
+	// TODO validate period, retry and reset?
+	obj.period, err = time.ParseDuration(obj.Period)
+	if err != nil {
+		log.Printf("%v[%v]: Validate(%s)", obj.Kind(), obj.GetName(), err)
+		return false
+	}
 	return true
 }
 
